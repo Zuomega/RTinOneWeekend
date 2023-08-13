@@ -1,0 +1,1 @@
+gcc imgout.cpp color.h vector3.h
