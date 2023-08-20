@@ -3,9 +3,9 @@
 
 #include <cmath>
 #include <iostream>
-
+#include "utils.h"
 using std::sqrt;
-#define  FLOAT_FORMAT double 
+
 
 class vec3
 {
