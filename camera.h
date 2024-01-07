@@ -103,11 +103,12 @@ private:
     }
 
     color ray_color(const ray & r, const hittable & world) const{
-         hit_record rec;
+        hit_record rec;
         interval ray_t(0, infinity);
         if (world.hit(r,  ray_t, rec))
         {
-            return 0.5 * (rec.normal + color(1,1,1));
+            vec3 direction = random_on_hemisphere(rec.normal);
+            return 0.7 * ray_color(ray(rec.p, direction), world);
         }
         vec3 unit_direction = unit_vector(r.direction());
         auto a = 0.5*(unit_direction.y() + 1.0);
