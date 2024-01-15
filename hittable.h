@@ -5,12 +5,17 @@
 #include "utils.h"
 #include "interval.h"
 
+//#include "material.h"
+
+class material;
 class hit_record{
     public:
-        point3 p;
+        point3 p; // hit point
         vec3 normal;
         FLOAT_FORMAT t;
         bool front_face;
+
+        shared_ptr<material> mat;
 
         void set_face_normal(const ray& r, const vec3& outward_normal)
         {
