@@ -8,8 +8,8 @@
       "args": [],
       "stopAtEntry": false,
       "externalConsole": true,
-      "cwd": "c:/Created_Data/RTinOneWeekend",
-      "program": "c:/Created_Data/RTinOneWeekend/build/Debug/outDebug",
+      "cwd": "e:/Created_Data/RTinOneWeekend",
+      "program": "e:/Created_Data/RTinOneWeekend/build/Debug/outDebug",
       "MIMode": "gdb",
       "miDebuggerPath": "gdb",
       "setupCommands": [
