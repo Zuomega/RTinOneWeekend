@@ -153,7 +153,7 @@ inline vec3 reflect(const vec3& v, const vec3& n)
 }
 
 
-inline vec3 refract(const vec3& uv, const vec3&n, double etai_over_etat)
+inline vec3 refract(const vec3& uv, const vec3&n, FLOAT_FORMAT etai_over_etat)
 {
     // In and Out ray are all unit
     auto cos_theta = fmin(dot(-uv, n), 1.0);

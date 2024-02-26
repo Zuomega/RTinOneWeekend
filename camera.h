@@ -18,6 +18,8 @@ public:
 
     int sample_per_pixel; // Count of random samples for each pixel
     int max_depth = 10; // Maximum number of ray bounces into scene
+
+    FLOAT_FORMAT vfov = 90; // degree
     
     camera(FLOAT_FORMAT aspect_ratio, int img_w, int sample_per_pixel, int max_depth) 
     : aspect_ratio(aspect_ratio)
