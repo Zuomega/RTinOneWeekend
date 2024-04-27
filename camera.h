@@ -20,6 +20,12 @@ public:
     int max_depth = 10; // Maximum number of ray bounces into scene
 
     FLOAT_FORMAT vfov = 90; // degre
+    point3 lookfrom = point3(0,0,0);
+    point3 lookat = point3(0,0,-1);
+    point3 vup = vec3(0,1,0);
+
+    FLOAT_FORMAT defocus_angle = 0;
+    FLOAT_FORMAT focus_dist = 10;
     
     camera(FLOAT_FORMAT aspect_ratio, int img_w, int sample_per_pixel, int max_depth) 
     : aspect_ratio(aspect_ratio)
@@ -60,30 +66,44 @@ private:
     point3 pixelx0y0_loc;
     point3 pixel_delta_u;
     point3 pixel_delta_v;
+    vec3    u,v,w;
+    vec3 defocus_disk_u;
+    vec3 defocus_disk_v;
+
     void initialize()
     {
-        camera_c = point3(0,0,0);
+        camera_c = lookfrom;//(0,0,0);
 
         img_h = static_cast<int>(img_w / aspect_ratio);
         img_h = (img_h < 1) ? 1 : img_h;
 
         // Determine viewport dimensions.
-        auto focal_length = 1.0;
-        auto viewport_h = 2.0;
+        //auto focal_length = (lookfrom - lookat).length();//1.0;
+        auto theta = degrees_to_radians(vfov);
+        auto h = tan(theta/2);
+        auto viewport_h = 2.0 * h * focus_dist;
         auto viewport_w = viewport_h * (static_cast<FLOAT_FORMAT>(img_w) / img_h); 
-        
+
+        // Calculate uvw unit basis for camera coordinate frame.
+        w = unit_vector(lookfrom - lookat);
+        u = unit_vector(cross(vup, w));
+        v = cross(w, u);
+       
          // Calculate the vectors across the horizontal and down the vertical viewport edges.
-        auto viewport_u = vec3(viewport_w, 0, 0);
-        auto viewport_v = vec3(0, -viewport_h, 0);
+        auto viewport_u = viewport_w * u;//vec3(viewport_w, 0, 0);
+        auto viewport_v = viewport_h * -v;//vec3(0, -viewport_h, 0);
 
         // Calculate the horizontal and vertical delta vectors from pixel to pixel.
         pixel_delta_u = viewport_u / img_w;
         pixel_delta_v = viewport_v / img_h;
 
         // Calculate the location of the upper left pixel.
-        auto viewport_upper_left = camera_c + (-vec3(0, 0, focal_length)) - viewport_u/2 - viewport_v/2;
+        auto viewport_upper_left = camera_c - (focus_dist * w) - viewport_u/2 - viewport_v/2;//(-vec3(0, 0, focal_length)) - viewport_u/2 - viewport_v/2;
         pixelx0y0_loc = viewport_upper_left + 0.5 * (pixel_delta_u + pixel_delta_v);
 
+        auto defocus_radius = focus_dist * tan(degrees_to_radians(defocus_angle / 2));
+        defocus_disk_u = u * defocus_radius;
+        defocus_disk_v = v * defocus_radius;
     }
 
     ray get_ray(int i, int j) const{
@@ -92,7 +112,7 @@ private:
         auto pixel_c = pixelx0y0_loc + (i*pixel_delta_u) + (j*pixel_delta_v);
         auto pixel_sample = pixel_c + pixel_sample_square();
 
-        auto ray_origin = camera_c;
+        auto ray_origin = (defocus_angle <= 0) ? camera_c: defocus_disk_sample();//camera_c;
         
 
         auto ray_direction = pixel_sample - ray_origin;
@@ -105,6 +125,12 @@ private:
         auto px = -0.5 + random_double();
         auto py = -0.5 + random_double();
         return (px * pixel_delta_u) + (py * pixel_delta_v);
+    }
+
+    point3 defocus_disk_sample() const{
+        // return a random point in the camera defocus disk.
+        auto p = random_in_unit_disk();
+        return camera_c + (p[0] * defocus_disk_u) + (p[1] * defocus_disk_v);
     }
 
     color ray_color(const ray & r, int depth, const hittable & world) const{
